@@ -40,35 +40,52 @@ ui <- fluidPage(
     )
 
 server <- function(input, output, session){
-    output$patient_stock <-  renderText({
-        patient_stock_val <- (input$bed_occ/100) * input$ga_beds
-        paste0("Total admitted patient stock: ",
-               patient_stock_val)
+    patient_stock_val <- reactive({
+        (input$bed_occ/100) * input$ga_beds
     })
-    output$avg_los <-  renderText({
-        avg_los_val <- input$pre_DRD_los + input$post_DRD_los
-        paste0("Total average length of stay: ",
-               avg_los_val)
+    
+    avg_los_val <- reactive({
+        input$pre_DRD_los + input$post_DRD_los
     })
-    output$total_admissions <-  renderText({
-        total_admissions_val <- patient_stock_val / avg_los_val
-        paste0("Total admissions (Patients per day): ",
-               total_admissions_val)
+    
+    total_admissions_val <- reactive({
+        patient_stock_val() / avg_los_val()
     })
-    output$ctr_stock <-  renderText({
-        ctr_stock_val <- total_admissions_val * input$pre_DRD_los
-        paste0("CTR stock: ",
-               ctr_stock_val)
+    
+    ctr_stock_val <- reactive({
+        total_admissions_val() * input$pre_DRD_los
     })
-    output$nctr_stock <-  renderText({
-        nctr_stock_val <- patient_stock_val - ctr_stock_val
-        paste0("NCTR stock: ",
-               nctr_stock_val)
+    
+    nctr_stock_val <- reactive({
+        patient_stock_val() - ctr_stock_val()
     })
-    output$nctr_per_bed <-  renderText({
-        nctr_per_bed_val <- nctr_stock_val / input$ga_beds
-        paste0("NCTR per bed: ",
-               nctr_per_bed_val)
+    
+    nctr_per_bed <- reactive({
+        nctr_stock_val() / input$ga_beds
+    })
+    
+    output$patient_stock <- renderText({
+        paste0("Total admitted patient stock: ", round(patient_stock_val(), 1))
+    })
+    
+    output$avg_los <- renderText({
+        paste0("Total average length of stay: ", round(avg_los_val(), 1))
+    })
+    
+    output$total_admissions <- renderText({
+        paste0("Total admissions (Patients per day): ", round(total_admissions_val(), 1))
+    })
+    
+    output$ctr_stock <- renderText({
+        paste0("CTR stock: ", round(ctr_stock_val(), 0))
+    })
+    
+    output$nctr_stock <- renderText({
+        paste0("NCTR stock: ", round(nctr_stock_val(), 0))
+    })
+    
+    output$nctr_per_bed <- renderText({
+        paste0("NCTR per bed: ", round(nctr_per_bed(), 2))
     })
 }
 
