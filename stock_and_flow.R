@@ -8,8 +8,7 @@ library(tidyverse)
 ui <- fluidPage(
     titlePanel("Hospital discharge stock and flow calculator tool version 1.0"),
     sidebarPanel(
-        selectInput(inputId = 'test', label = 'Select ***', choices = c(0,1,2))
-        ),
+        htmlOutput("text2")),
     mainPanel(
         tabsetPanel(
             #Calculator A UI ----
@@ -50,11 +49,11 @@ ui <- fluidPage(
             #Calculator B UI ----
             tabPanel('Calculator B',
                      numericInput(inputId = 'cb_nctr_per_bed_in',
-                                  label = 'Select NCTR per bed:',
+                                  label = 'Select NCTR per bed (%):',
                                   value = NA,
                                   min = 0,
-                                  max = 1,
-                                  step = 0.01),
+                                  max = 100,
+                                  step = 1),
                      numericInput(inputId = 'cb_post_DRD_los_in',
                                   label = 'Select average post-DRD length of delay (all patients):',
                                   value = NA,
@@ -84,11 +83,11 @@ ui <- fluidPage(
             #Calculator C UI ----
             tabPanel('Calculator C',
                      numericInput(inputId = 'cc_nctr_per_bed_in',
-                                  label = 'Select NCTR per bed:',
+                                  label = 'Select NCTR per bed (%):',
                                   value = NA,
                                   min = 0,
-                                  max = 1,
-                                  step = 0.01),
+                                  max = 100,
+                                  step = 1),
                      numericInput(inputId = 'cc_pre_DRD_los_in',
                                   label = 'Select average pre-DRD length of stay:',
                                   value = NA,
@@ -154,6 +153,15 @@ ui <- fluidPage(
     )
 
 server <- function(input, output, session){
+    #assumptions text ----
+    
+    output$text2 <- renderUI({
+        HTML(paste("<b>Assumptions:", 
+                   "1) The system is in equilibrium",
+                   "2) Metrics cover the same cohort of patients, over the same period of time",
+                   "3) Outputs are estimates and therefore have uncertainty around them",
+                   sep="<br/>"))
+    })
     
     #calculator A ----
     
@@ -194,7 +202,7 @@ server <- function(input, output, session){
     })
     
     output$ca_total_admissions_out <- renderText({
-        paste0("Total admissions (Patients per day): ", round(ca_total_admissions_val(), 1))
+        paste0("Total admissions (Patients per day): ", round(ca_total_admissions_val(), 0))
     })
     
     output$ca_avg_los_out <- renderText({
@@ -202,7 +210,7 @@ server <- function(input, output, session){
     })
     
     output$ca_nctr_per_bed_out <- renderText({
-        paste0("NCTR per bed: ", round(ca_nctr_per_bed_val(), 2))
+        paste0("NCTR per bed: ", round(ca_nctr_per_bed_val()*100, 0), "%")
     })
         
     #calculator B ----
@@ -216,7 +224,7 @@ server <- function(input, output, session){
     })
     
     cb_nctr_stock_val <- reactive({
-        input$cb_post_DRD_los_in * input$cb_ga_beds_in
+        (input$cb_nctr_per_bed_in/100) * input$cb_ga_beds_in
     })
     
     cb_total_admissions_val <- reactive({
@@ -266,7 +274,7 @@ server <- function(input, output, session){
     })
     
     cc_nctr_stock_val <- reactive({
-        input$cc_nctr_per_bed_in * input$cc_ga_beds_in
+        (input$cc_nctr_per_bed_in/100) * input$cc_ga_beds_in
     })
     
     cc_total_admissions_val <- reactive({
@@ -344,15 +352,15 @@ server <- function(input, output, session){
     })
     
     output$cd_avg_los_out <- renderText({
-        paste0("Total average length of stay: ", round(cd_avg_los_val(), 1))
+        paste0("Total average length of stay: ", round(cd_avg_los_val(), 0))
     })
     
     output$cd_pre_DRD_los_out <- renderText({
-        paste0("Average pre-DRD length of delay: ", round(cd_pre_DRD_los_val(), 1))
+        paste0("Average pre-DRD length of delay: ", round(cd_pre_DRD_los_val(), 0))
     })
     
     output$cd_nctr_per_bed_out <- renderText({
-        paste0("NCTR per bed: ", round(cd_nctr_per_bed_val(), 2))
+        paste0("NCTR per bed: ", round(cd_nctr_per_bed_val()*100, 0), "%")
     })
 }
 
