@@ -8,7 +8,7 @@ library(tidyverse)
 ui <- fluidPage(
     titlePanel("Hospital discharge stock and flow calculator tool version 1.0"),
     sidebarPanel(
-        htmlOutput("text2")),
+        htmlOutput("text2")), #assumptions
     mainPanel(
         tabsetPanel(
             #Calculator A UI ----
