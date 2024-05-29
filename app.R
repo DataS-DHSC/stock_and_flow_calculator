@@ -362,6 +362,11 @@ server <- function(input, output, session){
     output$cd_nctr_per_bed_out <- renderText({
         paste0("NCTR per bed: ", round(cd_nctr_per_bed_val()*100, 0), "%")
     })
+    
+    # stop app when window closed
+    session$onSessionEnded(function() {
+        stopApp()
+    })
 }
 
 
